@@ -2,14 +2,7 @@
 An Application for secure email exchange: including secure canal generating DH on elliptic curve for delivery of the secret key, encryption-decryption with Serpent
 
 **Authors**:
-
-Tal Tolochinsky 
-
-Kfir Willfand 
-
-Dvir Kovalio
-
-Zehavit Otmazgin 
+Tal Tolochinsky, Kfir Willfand,  Dvir Kovalio, Zehavit Otmazgin 
 
 ## **Serpent algorithm**
 
