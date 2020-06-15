@@ -873,8 +873,12 @@ def convert_to_bitstring(text_string, numBits):
 
 def bit_string_to_string(text_int_format):
     n = int(text_int_format, 2)
+    if n == 0: return ""
+
     res = binascii.unhexlify('%x' % n)
-    res = res.decode('utf-8')
+    res = res.decode('ascii')
+    res = res.rstrip('\x00')
+
     return res
 
 
@@ -885,7 +889,7 @@ def encrypt_text(text, key_128):
     user_key = get_user_key(key_128)
 
     # genrate plainText
-    num_of_blocks = int("{:.0f}".format(len(text) / 16))
+    num_of_blocks = calc_number_of_blocks(text, 16)
     for block_num in range(0, num_of_blocks):
         start_index = block_num * 16
         text_block = text[start_index:start_index + 16]
@@ -896,13 +900,24 @@ def encrypt_text(text, key_128):
     return cipherText
 
 
+def calc_number_of_blocks(text, n):
+    print("calculate number of blocks...")
+    num_of_blocks = int(len(text) / n)
+
+    if (len(text) % n) != 0:
+        num_of_blocks = num_of_blocks + 1
+
+    print("[Validation] "+str(len(text)) + "/" + str(n) + " = " + str(len(text) / n) + " => needs '" + str(num_of_blocks) + "' blocks")
+    return num_of_blocks
+
+
 def decrypt_text(cipher_text, key_128):
     # init
     text = ''
     user_key = get_user_key(key_128)
 
     # genrate plainText
-    num_of_blocks = int("{:.0f}".format(len(cipher_text) / 128))
+    num_of_blocks = calc_number_of_blocks(cipher_text, 128)
     for block_num in range(0, num_of_blocks):
         start_index = block_num * 128
         text_block = cipher_text[start_index:start_index + 128]
@@ -922,14 +937,28 @@ def get_user_key(key_128):
     return user_key
 
 
-def main():
-    text = "Our2 34234ff dentists, hygienists and assistants alleviate " \
-           "pain and restore oral health through exams, prophylaxis, intraoral " \
-           "and panoramic X-rays, basic restorations and carefully evaluated extractions. " \
-           "In some cases, volunteer oral surgeons and other specialists are called upon to " \
-           "provide more extensive treatment."
+def get_formatted_cipher_text(cipher_text):
+    text = ''
+    # genrate plainText
+    num_of_blocks = int("{:.0f}".format(len(cipher_text) / 16))
+    for block_num in range(0, num_of_blocks):
+        start_index = block_num * 16
+        text_block = cipher_text[start_index:start_index + 16]
 
-    key_128 = "AF1AB8CDCA128A97AF1AB8CDCA128a93"
+        n = int(text_block, 2)
+        res = binascii.unhexlify('%x' % n)
+        res = res.strip()
+        res = res.decode('utf-8', 'ignore')
+
+        text = text + res
+
+    return text
+
+
+def main():
+    text = "dam"
+
+    key_128 = "AF1AB8CDC2128A97AF1AB8CDCA128a93AF1AB8CDC2128A97AF1AB8CDCA128a9a"
 
     cipher_text = encrypt_text(text, key_128)
     print(cipher_text)
